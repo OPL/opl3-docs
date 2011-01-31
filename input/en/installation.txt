@@ -1,0 +1,82 @@
+Title: Installation
+
+---
+
+In this chapter, we describe, how to install Open Power Libs projects in your development environment. There are three different ways for this:
+
+* manual installation,
+* PHAR archives,
+* PEAR installation.
+
+Component dependency diagram
+============================
+
+The component diagram below shows the dependencies between OPL libraries and third party components. You can use it to check whether you have installed everything you need for proper work.
+
+![Dependency diagram](media/dependency.png)
+
+Installation procedure
+======================
+
+Before installing Open Power Libs 3, please ensure that you understand [PSR-0](http://groups.google.com/group/php-standards/web/psr-0-final-proposal) class naming standard, because it is very important to the project file organization.
+
+Manual installation
+-------------------
+
+We assume that your project directory tree contains some `/lib` or `/src` directory, where we can store libraries and (typically) the framework source code.
+
+1. download the archive from [www.invenzzia.org](http://www.invenzzia.org),
+2. extract the downloaded archive somewhere,
+3. copy the `/src/Opl` directory from the downloaded archive to the `/src/Opl` directory in your project directory tree,
+4. configure the autoloader (see below).
+
+This is the basic installation that would allow you to run the downloaded code. Note that other libraries may require some additional steps here.
+
+PHAR installation
+-----------------
+
+Open Power Libs 3 can be also downloaded as a single, self-contained PHAR archive. Just put it somewhere in your project directory and configure the autoloader to load the `Opl` namespace from that archive.
+
+PEAR installation
+-----------------
+
+Open Power Libs 3 libraries can be also installed via PEAR installer:
+
+~~~~
+[console]
+pear channel-discover pear.invenzzia.org
+pear install OPL_Libraryname
+~~~~
+
+After installing the libraries, you must configure the autoloader in your project to load OPL classes.
+
+Configuring autoloaders
+=======================
+
+Once we have successfully copied the files, we must configure some autoloader. Open Power Libs will work with any autoloader compatible with [PSR-0](http://groups.google.com/group/php-standards/web/psr-0-final-proposal) standard, so you do not have to install or use **Open Power Autoloader**. The libraries share the same top-level namespace: `Opl`, and the same primary directory - you just have to configure the path to that namespace and it should handle properly any OPL library installed later.
+
+A sample configuration for the `SplClassLoader`:
+
+~~~~
+[php]
+$symfonyLoader = new SplClassLoader('Symfony', '/path/to/src');
+$symfonyLoader->register();
+
+$oplLoader = new SplClassLoader('Opl', '/path/to/src');
+$oplLoader->register();
+~~~~
+
+A sample configuration for the OPL generic autoloader:
+
+~~~~
+[php]
+require('../src/Opl/Autoloader/GenericLoader.php');
+$loader = new Opl\Autoloader\GenericLoader('\\', '../src');
+// 'Opl' is in ../src
+$loader->addLibrary('Opl');
+// 'Symfony' is in ../src too.
+$loader->addLibrary('Symfony');
+$loader->register();
+~~~~
+
+See the autoloader chapter in order to learn, how to use the available OPL autoloader.

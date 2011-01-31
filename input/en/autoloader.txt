@@ -1,0 +1,6 @@
+Title: Open Power Autoloader
+
+---
+
+This unit describes the use of the autoloader collection provided by Open Power Libs. There are three different autoloaders available which recognize the same set of class names, but have been designed for different purposes.
+

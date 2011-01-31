@@ -1,0 +1,43 @@
+Title: Performance
+
+----
+
+In the modern web applications with heavy object-oriented programming usage, autoloader operations can take a significant amount of the execution time. Caching systems do not help here, becasue even if they cache a particular file, PHP still must translate the class name into the file path in order to locate it in the shared memory. By optimizing the autoloader code, your application can get a remarkable boost. Performance was the primary goal while designing the autoloaders available in this package.
+
+Theory of optimization
+======================
+
+In order to make the fastest autoloader in the world, we must meet the following criteria:
+
+* the autoloader should not have any external dependencies,
+* the class name translation code should be short,
+* the class name translation should not do unnecessary string operations,
+* a single translation process should handle as many classes, as possible - breaking the process and passing the task to the next autoloader in the queue should not happen at all.
+
+What makes autoloaders slow, is overloaded configuration, and rich feature set. 
+
+The autoloader benchmark
+========================
+
+In the benchmark, we tested loading 200 files grouped in 10 top-level namespaces representing 10 different libraries. The test was repeated 20 times, and after removing the slowest result, the average time was calculated. The test was made on PHP 5.3.5 with APC, only the effective time spent in the autoloading routine was measured.
+
+Autoloader name                    | Average time   | Comments
+-----------------------------------|----------------|------------------
+ Manual loading                    | 0.0907 s       |
+ OPL ClassMapLoader                | 0.1005 s       |
+ OPL GenericLoader                 | 0.1218 s       |
+ Doctrine 2 Class Loader           | 0.1450 s       | A single instance can handle only one library - we have to register 10 autoloaders, not compatible with [PSR-0](http://groups.google.com/group/php-standards/web/psr-0-final-proposal)
+ SplClassLoader                    | 0.1649 s       | A single instance can handle only one library - we have to register 10 autoloaders.
+ Symfony 2 Universal Class Loader  | 0.1826 s       | Allows to set different paths for sub-namespaces
+ Zend Framework 1.11 Loader        | 0.2092 s       | Advanced configuration and feature set, based on `include_path` settings which can make the result even worse, if the libraries are in different locations.
+
+Optimization with OPL autoloaders
+=================================
+
+In order to achieve the biggest performance, you should choose the proper autoloader to your situation. Each of them recognizes basically the same set of classes, so you can use them interchangeably in different environments. `GenericAutoloader` is designed for the development environments and low-traffic websites. The class names are translated dynamically, so it is the best for the development process, where the new classes appear all the time.
+
+However, the dynamic translation costs us time. During the internal experiments, we used the algorithm from `GenericAutoloader` in a web application project. Despite using APC and active caching, the autoloader operations took more than 40% of overall request processing time. If we replace this 10-line class name translation code with something faster, the performance boost is significant.
+
+As we can see from the benchmark, `ClassMapLoader` is much faster than `GenericAutoloader`, but it requires us to generate a static class map. If we modify the class structure, the map must be generated again in order to reflect the changes. It means that this autoloader is suitable for production environments and websites with bigger traffic.
+
+For self-contained web and console applications packaged with PHAR, we should use `PHARLoader` installed directly in the archive stub. It is optimized for this use by removing all the unnecessary path configuration, as we can safely assume that once we have an archive, its content won't change, or the archive will be generated again from scratch. In addition, it allows to save the class map directly in the stub, instead of loading it from a serialized array.

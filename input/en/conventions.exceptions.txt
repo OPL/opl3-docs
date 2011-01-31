@@ -1,0 +1,36 @@
+Title: Exceptions
+SeeAlsoExternal:
+ - http://docs.php.net/manual/en/spl.exceptions.php SPL exception description
+
+---
+
+Open Power Libs projects report problems with the exception mechanism available in PHP 5. The exception class hierarchy from [Standard PHP Library](http://docs.php.net/spl) is used. It introduces several basic exception classes, and defines their semantics. In addition, OPL defines a number of custom exceptions that follow these conventions.
+
+SPL exceptions
+==============
+
+The two basic exception classes are `RuntimeException` and `LogicException`. The first class is used for all the exceptions that are caused by the invalid input data or system configuration. They can be usually treated as user errors. Sample problems that fall under this category:
+
+* specifying a negative database row identifier,
+* attempting to access some page without permissions.
+
+The second category represents various problems with the internal program logic. According to the manual, such exceptions are typically caused by bugs in the code and should lead to a fix.
+
+Note that sometimes the code that wants to throw an exception cannot discover whether the problem has been caused by the end user error, or a bug in the system code. For example, when we attempt to empty a collection of elements, we can encounter an `UnderflowException`. Depending on the context and our needs, it can be caused both by the invalid data that have been entered, and a bug in the algorithm. In this case, a `RuntimeException` is preferred.
+
+> [warning]
+> Unfortunately, there are lots of errors and inconsequences in the SPL exception descriptions in the official PHP manual, especially when compared to the earlier [Doxygen documentation](http://www.php.net/~helly/php/ext/spl/). Fortunately, those issues are known to the PHP team and we hope they will fix them soon. 
+
+OPL extensions
+==============
+
+The default SPL exception classes do not cover all the possible problems. OPL libraries are allowed to define their own, domain-specific exceptions that extend either the base `Exception` class, or one of the SPL exceptions. The following conventions are used here:
+
+* All the custom exceptions belong to `Opl\ProjectName\Exception` namespace.
+* All the custom exceptions use the `FooException` name.
+* The custom exceptions are allowed to extend the default exception interface with new methods.
+
+Handling exceptions
+===================
+
+Open Power Libs does not enforce using any concrete exception handling strategy. It is up to the programmer, where he would catch them, and what he would do with them. However, for the programmer's convenience, the foundation provides an **Open Power Error Handler** library, responsible for formatting and printing the error information from exceptions. The error handler can be extended in a number of ways, so that it could display lots of useful debugging information. We encourage you to check it out and see if it matches your needs.

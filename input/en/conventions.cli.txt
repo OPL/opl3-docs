@@ -1,0 +1,70 @@
+Title: Command line interface
+SeeAlsoExternal:
+ - http://api.symfony-reloaded.org/PR5/Symfony/Component/Console.html Symfony 2 Console API documentation
+
+---
+
+Currently, many PHP applications provide a command-line interface tool which allows the developer and administrator to perform certain tasks from the operating system command line, instead of a web browser. Some of the libraries from the OPL foundation contain default implementation of various CLI commands that can be used in your system. However, OPL does not introduce yet another CLI environment, but rather uses the one from **Symfony 2**. In order to use them in your application, you must install `Symfony\Component\Console` component in your project.
+
+Conventions
+===========
+
+In OPL, the CLI commands are always located under `Opl\Projectname\Command` namespace. You are guaranteed that these classes are not loaded by any other part of the library, so if you do not want to use a command-line interface, you can easily ignore them. The command names are prefixed with `opl:projectname:` string, allowing you to avoid potential naming conflicts. Example commands:
+
+* `opl:autoloader:build-class-map` - `Opl\Autoloader\Command\ClassMapBuild`
+
+Building a CLI
+==============
+
+Open Power Libs does not provide a ready-to-use CLI. Instead, you must combine your own one, using the Symfony 2 CLI API, and binding requested OPL commands to it:
+
+~~~~
+[php]
+<?php
+// Configure the autoloader
+require_once(__DIR__.'./autoload.php');
+
+// Configure the CLI environment and other tools, if necessary
+$cli = new \Symfony\Component\Console\Application('My CLI', '1.0');
+$cli->setCatchExceptions(true);
+
+// Bind commands
+$cli->addCommands(array(
+	new \Opl\Autoloader\Command\ClassMapBuild(),
+));
+$cli->run();
+~~~~
+
+Integration with third party tools
+==================================
+
+Trinity
+-------
+
+Because Trinity Framework is built upon Open Power Libs, the CLI commands are available there by default. You do not have to install or configure anything in order to use them.
+
+Symfony 2
+---------
+
+Open Power Libs CLI commands can be directly integrated with Symfony 2, by writing or using an existing OPL bundle, and overwriting the `registerCommands()` method:
+
+~~~~
+[php]
+<?php
+use Symfony\Component\HttpKernel\Bundle\Bundle;
+use Symfony\Component\Console\Application;
+
+class OplBundle extends Bundle
+{
+	public function registerCommands(Application $application)
+	{
+		$application->add(new \Opl\Autoloader\Command\ClassMapBuild());
+		// etc.
+	} // end registerCommands();
+} // end OplBundle;
+~~~~
+
+Zend Framework
+--------------
+
+OPL commands cannot be integrated with Zend Framework, because this framework uses a different API for its CLI tasks.

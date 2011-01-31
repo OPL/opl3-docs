@@ -1,0 +1,62 @@
+Title: Introduction
+
+---
+
+What Open Power Libs is?
+========================
+
+Open Power Libs is a collection of specialized utility libraries for PHP 5.3+. While it is not a complete framework, because it focuses on certain problems only, it can be used to support some existing frameworks or to build a new one. The libraries have been designed with strict code and API quality standards that guarantee you simple integration and flexibility.
+
+The collection currently consists of the following libraries:
+
+* **Open Power Autoloader** - collection of fast, universal class autoloaders.
+* **Open Power Cache** - unified interface for various caching systems.
+* **Open Power Error Handler** - advanced error message renderer, with context handling.
+* **Open Power Forms** - form processor integrated with Open Power Template.
+* **Open Power Navigation** - website navigation manager.
+* **Open Power Pagination** - pagination component.
+* **Open Power Security** - security framework and a growing collection of various access control and security mechanisms.
+* **Open Power Template** - advanced, XML-based template engine.
+* **Open Power Translate** - alternative internationalization component compatible with the Symfony 2 Translate interfaces.
+* **Open Power Visitor** - collects information about the user and the HTTP request.
+
+History
+=======
+
+The origins of Open Power Libs are dated to 2004, when a group of programmers decided to create an open-source discussion board. In addition, the group planned to create a set of utility libraries for the purpose of the main project that could be also used as standalone components. The main project failed very quickly, but the libraries were being still developed, resulting in creation of Open Power Libs 1.x foundation which consisted of three libraries: *Open Power Driver*, a PDO-based database driver, *Open Power Forms*, a form processor, and *Open Power Template*, a template engine.
+
+In 2008, the programmers involved in the project, led by Tomasz Jędrzejewski, formed an open-source development group called Invenzzia, focused on creating Open Power Libs 2.0. Next year, it managed to release a stable core and the new version of template engine, which turned out to be the biggest success of the group. The other libraries, although being usable, stuck at various development stages due to the design problems. In addition, the appearance of PHP 5.3 made the library structure a bit outdated and it become clear that the work must be started again.
+
+Followed by a proper research and gaining experiences of the new PHP projects, especially Doctrine 2 and Symfony 2, in the early 2011, works on Open Power Libs 3 finally began.
+
+Requirements
+============
+
+PHP requirements:
+
+* PHP 5.3.2+,
+* Intl enabled,
+* PCRE enabled,
+* PHAR enabled,
+* SPL enabled.
+
+All the following components are available by default in every PHP 5.3 installation; unless you disabled it, you should already have them. For some of the libraries, it is strongly recommended to use a shared-memory caching system, i.e. [APC](http://docs.php.net/apc) or [Memcached](http://memcached.org/).
+
+Library requirements:
+
+* Any class autoloader compatible with [PSR-0](http://groups.google.com/group/php-standards/web/psr-0-final-proposal) class naming standard.
+* [Symfony 2 Console Component](http://symfony-reloaded.org) - for the CLI operations.
+* [Symfony 2 YAML Component](http://symfony-reloaded.org) - for operations on YAML files,
+* [Symfony 2 Event Dispatcher](http://symfony-reloaded.org)
+* [Symfony 2 Translation Component](http://symfony-reloaded.org) - for *Open Power Translate*
+
+How the libraries are designed?
+===============================
+
+Open Power Libs 3, as an Invenzzia Group project, is a subject to strict code and API quality standards. Their purpose is to ensure that the final result is free of design problems, flexible and easy-to-deploy. It is achieved by implementing the following goals:
+
+* **No magic** - magic behaviours and PHP language elements make the code harder to read and debug, by hiding the real nature of the element. In addition, they are not supported properly by IDE-s.
+* **Explicit dependency injection** - all the object dependencies must be injected explicitely by the programmer using the OOP design rules. It simplifies the customization and proper testing.
+* **No static class fields** - static class fields introduce a global state which is hard to debug, test and manage.
+* **Only local side effects** - a side effect is every system state change made by the function. Despite the name, sometimes side effects are good and the intended effects. We allow only local, well-defined side effects, so that they are easy to track and debug.
+* **Focusing on code reuse** - reinventing the wheel is not a good idea. There is a plenty of good code created so far. We do not reinvent wheel, if there is a third party, well-designed component that is a subject of similar quality standards and satisfies our needs.
