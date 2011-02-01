@@ -71,11 +71,11 @@ A sample configuration for the OPL generic autoloader:
 ~~~~
 [php]
 require('../src/Opl/Autoloader/GenericLoader.php');
-$loader = new Opl\Autoloader\GenericLoader('\\', '../src');
+$loader = new Opl\Autoloader\GenericLoader('../src/', '\\');
 // 'Opl' is in ../src
-$loader->addLibrary('Opl');
+$loader->addNamespace('Opl');
 // 'Symfony' is in ../src too.
-$loader->addLibrary('Symfony');
+$loader->addNamespace('Symfony');
 $loader->register();
 ~~~~
 
