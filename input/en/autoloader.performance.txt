@@ -26,10 +26,12 @@ Autoloader name                    | Average time   | Comments
  Manual loading                    | 0.0907 s       |
  OPL ClassMapLoader                | 0.1005 s       |
  OPL GenericLoader                 | 0.1218 s       |
- Doctrine 2 Class Loader           | 0.1450 s       | A single instance can handle only one library - we have to register 10 autoloaders, not compatible with [PSR-0](http://groups.google.com/group/php-standards/web/psr-0-final-proposal)
- SplClassLoader                    | 0.1649 s       | A single instance can handle only one library - we have to register 10 autoloaders.
+ Doctrine 2 Class Loader           | 0.1450 s       | A single instance can handle only one namespace - we have to register 10 autoloaders, not compatible with [PSR-0](http://groups.google.com/group/php-standards/web/psr-0-final-proposal)
+ SplClassLoader                    | 0.1649 s       | A single instance can handle only one namespace - we have to register 10 autoloaders.
  Symfony 2 Universal Class Loader  | 0.1826 s       | Allows to set different paths for sub-namespaces
- Zend Framework 1.11 Loader        | 0.2092 s       | Advanced configuration and feature set, based on `include_path` settings which can make the result even worse, if the libraries are in different locations.
+ Zend Framework 1.11 Loader        | 0.2092 s       | Advanced configuration and feature set, based on `include_path` settings which can make the result even worse, if the namespace are in completely different locations.
+
+If the project uses only a single top-level namespace, the Doctrine and SPL class loaders can actually be slightly faster, because they use simpler string operations. However, in reality this is a very rare situation. Typically, the project uses a couple of top-level namespaces.
 
 Optimization with OPL autoloaders
 =================================

@@ -1,7 +1,7 @@
 Title: GenericLoader
 Construct: class
 ENamespace: Opl\Autoloader
-Stability: alpha
+Stability: beta
 
 ----
 
@@ -16,40 +16,40 @@ In order to use the autoloader, you must load the `Opl\Autoloader\GenericLoader.
 [php]
 require('../src/Opl/Autoloader/GenericLoader.php');
 
-$loader = new \Opl\Autoloader\GenericLoader('\\', '../src/');
-$loader->addLibrary('Opl');
-$loader->addLibrary('Symfony');
+$loader = new \Opl\Autoloader\GenericLoader('../src/');
+$loader->addNamespace('Opl');
+$loader->addNamespace('Symfony');
 $loader->register();
 ~~~~
 
 The class constructor takes up to two (optional) arguments:
 
-* The namespace separator (use **\\** to handle PHP 5.3 namespaces).
-* The default path to the libraries.
+* The default path to the namespace sources.
+* The namespace separator (default is **\\** - PHP 5.3 namespaces).
 
 Once we have an object, we must specify, what top-level namespaces will be handled by it. If the class does not belong to any of the registered namespaces, the autoloader skips it, passing the request to the next loader in the chain. Finally, we register the autoloader in the PHP core by calling `register()`.
 
-Library configuration
-=====================
+Namespace configuration
+=======================
 
-There are three methods for managing the libraries registered in the autoloader:
+There are three methods for managing the top-level namespaces registered in the autoloader:
 
-* `addLibrary($name)` - registers a new library (top-level namespace) in the autoloader,
-* `hasLibrary($name)` - checks if the specified library is registered in the autoloader,
-* `removeLibrary($name)` - removes the library from the autoloader.
+* `addNamespace($name)` - registers a new top-level namespace in the autoloader,
+* `hasNamespace($name)` - checks if the specified namespace is registered in the autoloader,
+* `removeNamespace($name)` - removes the namespace from the autoloader.
 
-By default, newly registered namespaces are assumed to be located under the path specified in the class constructor, and the files to have `.php` extension. If these values are different for a particular library, we can configure them as optional `addLibrary()` arguments:
+By default, newly registered namespaces are assumed to be located under the path specified in the class constructor, and the files to have `.php` extension. If these values are different for a particular namespace, we can configure them as optional `addNamespace()` arguments:
 
 ~~~~
 [php]
-$loader->addLibrary('Application', '../app/', '.class.php');
+$loader->addNamespace('Application', '../app/', '.class.php');
 ~~~~
 
 > [information]
 > The registered namespace must not contain any namespace separator. It means that you cannot register subnamespaces in the autoloader, or set them custom paths. The following code is invalid and will not work:
 > 
 >     [php]
->     $loader->addLibrary('Application\\Subnamespace', '../extra/');
+>     $loader->addNamespace('Application\\Subnamespace', '../extra/');
 >
 > Note that the sub-namespaces are correctly handled as parts of the top-level namespaces. You just can't register them, and set a different location for them.
 
@@ -60,17 +60,19 @@ The namespace separator setting is applied for all the namespaces registered in 
 
 ~~~~
 [php]
-$nsLoader = new GenericLoader('\\', '../src/');
+$nsLoader = new GenericLoader('../src/', '\\');
 // OPL 3.0
-$nsLoader->addLibrary('Opl');
+$nsLoader->addNamespace('Opl');
 // Symfony 2
-$nsLoader->addLibrary('Symfony');
+$nsLoader->addNamespace('Symfony');
 $nsLoader->register();
 
-$legacyLoader = new GenericLoader('_', '../src/');
-$legacyLoader->addLibrary('Opt');
+$legacyLoader = new GenericLoader('../src/', '_');
+$legacyLoader->addNamespace('Opt');
 $legacyLoader->register();
 ~~~~
+
+The second autoloader uses underscores as namespace separators which allows us to load the legacy code that follows the `Foo_Bar_Joe` naming convention.
 
 Theory of operation
 ===================
@@ -85,7 +87,7 @@ The class name translation algorithm is relatively simple. The good thing about 
 6. Cut the substring from the beginning to the last namespace separator. This is the full namespace of the class.
 7. Replace underscores and namespace separators in the actual class name with the directory separators.
 8. Replace the namespace separators, but not underscores in the full namespace with the directory separators.
-9. Prepend the library path and append the extension.
+9. Prepend the namespace path and append the extension.
 10. Load the file.
 
 When to use?
