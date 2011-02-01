@@ -1,5 +1,54 @@
 Title: PHARLoader
+Construct: class
+ENamespace: Opl\Autoloader
+Stability: beta
+SeeAlsoExternal:
+ - http://docs.php.net/phar PHAR documentation in the PHP manual
 
 ----
 
-To be written.
+`PHARLoader` is a special version of the [class map loader][autoloader.available.phar-loader] for self-contained PHAR-s. It has been designed with the following observations:
+
+* the paths within the archive are constant and well-known,
+* the contents of the archive usually do not change. If there is a change, we can build a new archive,
+* when the archive is launched, PHP executes so-called *stub*, so there is no need to create an extra file for storing maps.
+
+This means that the API for the autoloader can be maximally simplified, and it can be registered as a part of the stub, together with the map.
+
+Building a PHAR
+===============
+
+The example below shows an example code that constructs a PHAR archive and installs `PHARLoader` in the stub, together with the class map:
+
+~~~~
+[php]
+<?php
+$phar = new Phar('./output/myarchive.phar');
+$phar->startBuffering();
+
+$phar->buildFromDirectory('./source/');
+
+$builder = new ClassMapBuilder();
+$builder->addNamespace('MyNamespace', './source/');
+
+$phar->setStub(file_get_contents(__DIR__.'/../src/Opl/Autoloader/PHARLoader.php').'
+$loader = new PHARLoader('.var_export($builder->getMap(), true).');
+$loader->register();
+__HALT_COMPILER();');
+
+$phar->stopBuffering();
+~~~~
+
+We use the [ClassMapBuilder][autoloader.class-maps] to generate a class map, which is later exported to the stub. Once the archive is completed, we can load it and use:
+
+~~~~
+[php]
+<?php
+require('./output/myarchive.phar');
+$object = new \MyNamespace\MyClass();
+~~~~
+
+When to use?
+============
+
+The autoloader has been designed for packed, self-contained console and web applications. It **should not** be used for archives that contain only code libraries, as it could lead to the namespace conflicts, if more than one is loaded in a single application.

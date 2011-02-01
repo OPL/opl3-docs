@@ -1,5 +1,45 @@
 Title: Building class maps
+ENamespace: Opl\Autoloader
+Stability: beta
 
 ---
 
-To be written.
+Some OPL autoloaders require externally constructed class maps in order to work correctly. In this section we are going to describe, how to build them with `ClassMapBuilder` class.
+
+Using ClassMapBuilder
+=====================
+
+The interface of `ClassMapBuilder` is very simple:
+
+~~~~
+[php]
+<?php
+require('./autoload.php');
+use Opl\Autoloader\ClassMapBuilder;
+
+$builder = new ClassMapBuilder();
+$builder->addNamespace('Opl', '../src/');
+$builder->addNamespace('Symfony', '../src/');
+
+echo serialize($builder->getMap());
+~~~~
+
+Each call of the `addNamespace` method scans the specified directory for PHP files, extracting all the found classes and namespaces. If the same class is found in two calls of the method, the next call overwrites the previous one. Finally, we can get the complete map with `getMap()` method. Note that [ClassMapLoader][autoloader.available.class-map-loader] requires the map to be saved as a serialized array to a text file.
+
+> [information]
+> You can also use the [opl:autoloader:build-class-map][autoloader.cli] CLI command to build class maps.
+
+Class map format
+================
+
+The map format is very simple. It is an associative array, where the index represents the fully qualified class name. The value is a pair of two values:
+
+* **0** - the top-level namespace name.
+* **1** - the relative path to the file with the class.
+
+The path is specified relatively to the root directory specified in the `addNamespace()` method. Suppose that we have `Foo\Bar` class in `../src/Foo/Bar.php`. The entry in the map will contain just the `Foo/Bar.php` part of the path. This allows to move the class hierarchy without the need to generate a new map, or define relative positions from different places. To identify the class hierarchy location, the autoloader must know the top-level namespace name.
+
+Parsing rules
+=============
+
+The class map builder extracts the class name by tokenizing the encountered PHP file and looking for `namespace`, `class` and `interface` components. It assumes that a single file contains only one class, and once it finds one, the searching is terminated. You cannot use this class map builder for projects, where the files can contain more than one class. Note that it also does not check whether the class name is compatible with PSR-0 class naming standard, so it can be also used for other styles.

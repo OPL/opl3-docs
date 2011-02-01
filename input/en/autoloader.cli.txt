@@ -1,5 +1,42 @@
 Title: CLI commands
+SeeAlso:
+ - conventions.cli
 
 ---
 
-CLI Commands
+The autoloader provides only one CLI command: `opl:autoloader:build-class-map`. It takes a single argument, which is the path to the INI file with the map configuration. The INI file contains the necessary data required to generate a proper map. Its structure is shown in the following listing:
+
+~~~~
+[ini]
+[config]
+; Where the map should be stored
+outputFile = "./config/classMap.txt"
+
+; The recognized file extension
+extension = ".php"
+
+[namespaces]
+Opl = "./src/"
+Symfony = "./src/"
+~~~~
+
+In the `namespaces` sections, we specify all the top-level namespaces and filesystem paths that should be scanned for PHP classes.
+
+Example call:
+
+~~~~
+[console]
+$ php cli.php opl:autoloader:build-class-map ../path/to/classMap.ini
+~~~~
+
+Adding the commands to the CLI
+==============================
+
+Open Power Libs does not provide its own command-line interface. Instead, it provides some commands that can be used to build one. The details concerning installing the commands in the CLI application are described in the [Command-line interface][conventions.cli] chapter. The example below shows, how to install `opl:autoloader:build-class-map`:
+
+~~~~
+[php]
+$cli->addCommands(array(
+	new \Opl\Autoloader\Command\ClassMapBuild(),
+));
+~~~~

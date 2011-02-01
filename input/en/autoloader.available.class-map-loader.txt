@@ -21,11 +21,11 @@ Before using the autoloade, you must build a [class map][autoloader.class-maps].
 outputFile = "./config/classMap.txt"
 
 ; The recognized file extension
-extension = "php"
+extension = ".php"
 
 [namespaces]
-Opl = "./lib/"
-Symfony = "/home/zyxist/Libs/"
+Opl = "./src/"
+Symfony = "/src/"
 ~~~~
 
 Here, we specify the recognized file extension and the output file path, as well as the paths to the top-level namespaces that should be scanned. Now we can build the map:
