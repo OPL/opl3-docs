@@ -1,6 +1,102 @@
 Title: GenericLoader
-
+Construct: class
+ENamespace: Opl\Autoloader
+Stability: alpha
 
 ----
 
-To be written.
+`GenericLoader` is a standard universal class loader designed for the development environment and low-traffic websites. It translates the class name to the filesystem path dynamically, so it is very scalable and flexible. Any change in the class hierarchy is supported without reconfiguration.
+
+Basic usage
+===========
+
+In order to use the autoloader, you must load the `Opl\Autoloader\GenericLoader.php` file manually and create an object of `GenericLoader` class:
+
+~~~~
+[php]
+require('../src/Opl/Autoloader/GenericLoader.php');
+
+$loader = new \Opl\Autoloader\GenericLoader('\\', '../src/');
+$loader->addLibrary('Opl');
+$loader->addLibrary('Symfony');
+$loader->register();
+~~~~
+
+The class constructor takes up to two (optional) arguments:
+
+* The namespace separator (use **\\** to handle PHP 5.3 namespaces).
+* The default path to the libraries.
+
+Once we have an object, we must specify, what top-level namespaces will be handled by it. If the class does not belong to any of the registered namespaces, the autoloader skips it, passing the request to the next loader in the chain. Finally, we register the autoloader in the PHP core by calling `register()`.
+
+Library configuration
+=====================
+
+There are three methods for managing the libraries registered in the autoloader:
+
+* `addLibrary($name)` - registers a new library (top-level namespace) in the autoloader,
+* `hasLibrary($name)` - checks if the specified library is registered in the autoloader,
+* `removeLibrary($name)` - removes the library from the autoloader.
+
+By default, newly registered namespaces are assumed to be located under the path specified in the class constructor, and the files to have `.php` extension. If these values are different for a particular library, we can configure them as optional `addLibrary()` arguments:
+
+~~~~
+[php]
+$loader->addLibrary('Application', '../app/', '.class.php');
+~~~~
+
+> [information]
+> The registered namespace must not contain any namespace separator. It means that you cannot register subnamespaces in the autoloader, or set them custom paths. The following code is invalid and will not work:
+> 
+>     [php]
+>     $loader->addLibrary('Application\\Subnamespace', '../extra/');
+>
+> Note that the sub-namespaces are correctly handled as parts of the top-level namespaces. You just can't register them, and set a different location for them.
+
+Handling legacy code
+====================
+
+The namespace separator setting is applied for all the namespaces registered in the autoloader. However, it is possible to use the autoloader for the legacy code that does not use PHP 5.3 namespaces, by registering two autoloaders. The example below shows, how to load Open Power Template 2.1 together with the new code:
+
+~~~~
+[php]
+$nsLoader = new GenericLoader('\\', '../src/');
+// OPL 3.0
+$nsLoader->addLibrary('Opl');
+// Symfony 2
+$nsLoader->addLibrary('Symfony');
+$nsLoader->register();
+
+$legacyLoader = new GenericLoader('_', '../src/');
+$legacyLoader->addLibrary('Opt');
+$legacyLoader->register();
+~~~~
+
+Theory of operation
+===================
+
+The class name translation algorithm is relatively simple. The good thing about it is that the average complexity does not depend on the number of the namespaces registered in the autoloader. This is the key to the performance. The translation procedure steps are:
+
+1. Find the first occurence of the namespace separator.
+2. Cut the substring from the beginning to the found namespace separator. This is the class top-level namespace.
+3. Check, if the top-level namespace is registered in the autoloader. If not, pass the request to the next autoloader in the chain.
+4. Find the last occurence of the namespace separator.
+5. Cut the substring from the last namespace separator to the end. This is the actual class name.
+6. Cut the substring from the beginning to the last namespace separator. This is the full namespace of the class.
+7. Replace underscores and namespace separators in the actual class name with the directory separators.
+8. Replace the namespace separators, but not underscores in the full namespace with the directory separators.
+9. Prepend the library path and append the extension.
+10. Load the file.
+
+When to use?
+============
+
+You should use this autoloader in:
+
++ the development environment,
++ low-traffic websites.
+
+You should **not** use this autoloader in:
+
++ big-traffic websites (consider using [ClassMapLoader][autoloader.available.class-map-loader] instead),
++ the applications, when you have to configure lots of specific paths to the sub-namespaces (consider using `SplClassLoader` or Symfony 2 Universal Class Loader instead).

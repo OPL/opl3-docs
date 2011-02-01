@@ -1,5 +1,96 @@
 Title: ClassMapLoader
+Construct: class
+ENamespace: Opl\Autoloader
+Stability: alpha
+SeeAlso:
+ - autoloader.class-maps
 
 ----
 
-To be written.
+`ClassMapLoader` is a standard universal class loader designed for big traffic websites. It uses an externally generated class map loaded into memory at the beginning of the script. The map contains the filesystem locations of all the classes found in the system. It is accompanied by extra tools that allow you to build such a map automatically.
+
+Basic usage
+===========
+
+Before using the autoloade, you must build a [class map][autoloader.class-maps]. You can use the command line interface command for it, but first you have to prepare a configuration in an INI file:
+
+~~~~
+[ini]
+[config]
+; Where the map should be stored
+outputFile = "./config/classMap.txt"
+
+; The recognized file extension
+extension = "php"
+
+[libraries]
+Opl = "./lib/"
+Symfony = "/home/zyxist/Libs/"
+~~~~
+
+Here, we specify the recognized file extension and the output file path, as well as the paths to the libraries (top-level namespaces) that should be scanned. Now we can build the map:
+
+~~~~
+[console]
+$ ./cli opl:autoloader:build-class-map path/to/configuration.ini
+~~~~
+
+Once the map is ready, we can use `ClassMapLoader` in our application. The configuration is very similar to [GenericLoader][autoloader.available.generic-loader]:
+
+~~~~
+[php]
+require('../src/Opl/Autoloader/ClassMapLoader.php');
+
+$loader = new \Opl\Autoloader\ClassMapLoader('../output/classMap.txt', '../src/');
+$loader->addLibrary('Opl');
+$loader->addLibrary('Symfony');
+$loader->register();
+~~~~
+
+The map does not keep absolute paths, so you can still arrange the project layout through the autoloader reconfiguration.
+
+Library configuration
+=====================
+
+The library configuration for the autoloader is very similar to the one in [GenericLoader][autoloader.available.generic-loader]. There only difference is that you cannot set a file extension, as it is the part of the class map.
+
+Handling legacy code
+====================
+
+The autoloader can handle both the new and old, legacy code in a single instance. The full class name is stored in the map, and the map building utility recognizes both classes in the namespaces, and those without them. You do not need any extra configuration.
+
+Using cache for storing maps
+============================
+
+The autoloader allows to use an optional memory cache for storing the class maps. The **Open Power Cache** interface object can be injected as a third argument to the class constructor. Please note that the cache classes must be loaded manually, because the autoloader is not configured yet. The example below shows, how to store maps with APC:
+
+~~~~
+[php]
+require('../src/Opl/Autoloader/ClassMapLoader.php');
+require('../src/Opl/Cache/Cache.php');
+require('../src/Opl/Cache/APC.php');
+
+$loader = new \Opl\Autoloader\ClassMapLoader('../output/classMap.txt', '../src/',
+	new Opl\Cache\APC(array('prefix' => 'project.', 'lifetime' => 86400))
+);
+$loader->addLibrary('Opl');
+$loader->addLibrary('Symfony');
+$loader->register();
+~~~~
+
+It is recommended to save the created cache instance somewhere and pass it to the initialized system later.
+
+> [information]
+> Note that APC storage will not work in the command line interface and CGI (but not FastCGI), as it requires a constantly working interpreter in order to gain any benefits from it.
+
+Theory of operation
+===================
+
+The class map is loaded during the autoloader initialization and there is no way to reload it later. When a class loading request arrives, the loader looks for the appropriate row in the map. If the class is not found, the request is passed to the next autoloader in the chain. Finally, it prepends the library path from the configuration to the path read from the map and loads the class file. The details about the map structure can be found in [Building class maps][autoloader.class-maps] section.
+
+When to use?
+============
+
+This autoloader offers a bigger performance than `GenericLoader` at a cost of reduced flexibility. It is dedicated for big-traffic websites, where the performance is a critical issue. We do not recommend using it in the development environment, as it requires map regeneration on every class hierarchy change. For web and console applications stored in PHAR-s, you should choose [PHARLoader][autoloader.available.phar-loader].
+
+Note that this autoloader can be used also for projects that do not support [PSR-0](http://groups.google.com/group/php-standards/web/psr-0-final-proposal), because the classes are extracted directly from the source.

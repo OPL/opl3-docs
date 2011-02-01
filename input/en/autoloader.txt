@@ -2,5 +2,10 @@ Title: Open Power Autoloader
 
 ---
 
-This unit describes the use of the autoloader collection provided by Open Power Libs. There are three different autoloaders available which recognize the same set of class names, but have been designed for different purposes.
+**Open Power Autoloader** is a collection of universal class loaders for PHP 5.3+ with additional management tools. They handle [PSR-0](http://groups.google.com/group/php-standards/web/psr-0-final-proposal) class naming standard which has been recently adapted by many mainstream PHP projects. A single standard improves interoperability and allows OPA to support such projects, as Symfony 2 or Doctrine without any problems. The opposite relationship is also true - you can use autoloaders from these projects to load OPL code.
 
+The autoloaders provided by this package have been designed to achieve the biggest possible performance. In modern PHP applications, class loading has a critical influence on speed. Even if we use opcode caching, such as [APC](http://docs.php.net/apc), the autoloader must still translate the class name to the filesystem path. For projects with a greater number of classes, the parser can spend up to the 50% of the overall execution time in the autoloader code, so proper optimization in this place can give us a significant boost.
+
+The performance goal is achieved through some configuration sacrifices. For example, OPA does not allow you to define separate paths for sub-namespaces. The specific paths can be set only for the top-level namespaces only. The practice shows that this is just a minor limitation, because in a typical project, the programmers tend to keep the code organized and in one place. However, if you feel that such a feature is necessary for you, you should choose another autoloader instead, i.e. Symfony 2 Universal Class Loader. Each autoloader is a self-contained, compact class without any extra obligatory dependencies.
+
+Currently, there are three autoloaders in the package. Although they recognize basically the same set of class names, they have been designed for different situations. It is recommended to use them interchangeably, depending on the environment, where the application is going to be run.
