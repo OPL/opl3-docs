@@ -6,8 +6,15 @@ autoloader.available
 autoloader.class-maps
 autoloader.cli
 autoloader.performance
+collector
+collector.getting-started
+collector.theory-of-operation
+collector.caching
+collector.available
+collector.custom-loaders
 errorhandler
-visitor
 appendix
+appendix.versioning-scheme
+appendix.coding-style
 appendix.bugs
 appendix.license
