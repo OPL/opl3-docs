@@ -1,0 +1,42 @@
+Title: Versioning scheme
+Appendix: Yes
+
+----
+
+In this appendix, we are going to describe the versioning scheme used by OPL projects.
+
+Version number structure
+========================
+
+Open Power Libs projects use the four-digit version number: **a.b.c.d**. The first number is characteristic for the whole series, and the others are project-specific.
+
+* **Edition** - defines the OPL series the project belongs to.
+* **Major number** - project major version number. They can break backward compatibility and be written from scratch. Odd numbers represent stable releases, and even - development.
+* **Minor number** - project minor version number. With these versions, new features and improvements come. 
+* **Release number** - project release number. New releases bring bugfixes, and no new features.
+
+For the projects covered by this document, the edition number is always **3**, as there were also Open Power Libs 1 and Open Power Libs 2 in the past. The usage conventions for the other numbers are similar to those known from other pieces of software. For example, *3.0.3.5* number can be seen as a development version *0.3.5* in Open Power Libs series 3. The major number equal 0 is used for libraries that have not got any stable release yet, and only development snapshots are available.
+
+Examples:
+
+* *3.0.1.0* - the first development release for OPL series 3.
+* *3.0.2.7* - a typical development release for OPL series 3.
+* *3.1.0.0* - the first stable release for OPL series 3.
+* *3.1.1.3* - a bugfix release from *1.1* stable branch for OPL series 3.
+* *3.2.1.0* - the first development release of the next major revision for OPL series 3.
+* *3.3.0.0* - the first stable release of the next major revision for OPL series 3.
+* *4.0.1.0* - this version is for OPL series 4.
+
+Per-project versioning
+======================
+
+The only number shared by the OPL projects is the edition number that defines the OPL series the project belongs to. The other numbers are incremented independently for each project. This means that you cannot use them to determine the version compatibility between them. For example, *Open Power Foo 3.1.1.x* can be fully compatible with *Open Power Bar 3.1.3.x* despite the fact they have different minor numbers.
+
+The rationale for this decision is relatively straightforward. OPL consists of both big libraries, like *Open Power Template*, and small ones, like *Open Power Visitor* with only a couple of classes. In the first case, there is always a number of places, where the library can be improved or extended, and this is not always true in the second case. We do not want to make artifical releases, where the only change is the incremented number.
+
+Why version 3?
+==============
+
+Open Power Libs foundation has been developed since 2005, and some of the projects (especially *Open Power Template*) are very old ideas. There were three fundamental revisions of the idea, where the foundation was rewritten from scratch with the new design goals, and often different versioning schemes. We wanted to avoid version number conflicts with the older editions, but we did not want to be locked to **3** as the major version number, especially for the new projects, where bumping straight to **3.0.0** would be a bit confusing.
+
+We hope that there will be no need to create *Open Power Libs 4* at all.

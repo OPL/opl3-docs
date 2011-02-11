@@ -1,0 +1,6 @@
+Title: Coding style
+Appendix: Yes
+
+---
+
+To be written.
