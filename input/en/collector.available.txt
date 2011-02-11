@@ -1,0 +1,5 @@
+Title: Available loader sets
+
+----
+
+Open Power Collector provides a couple of default data loader sets that allow you to adapt it to the most common situations. In this section, we are going to describe them.

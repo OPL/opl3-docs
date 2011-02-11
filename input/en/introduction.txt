@@ -11,6 +11,7 @@ The collection currently consists of the following libraries:
 
 * **Open Power Autoloader** - collection of fast, universal class autoloaders.
 * **Open Power Cache** - unified interface for various caching systems.
+* **Open Power Collector** - generic data collector. Possible usage includes system configuration and HTTP request data collection.
 * **Open Power Error Handler** - advanced error message renderer, with context handling.
 * **Open Power Forms** - form processor integrated with Open Power Template.
 * **Open Power Navigation** - website navigation manager.
@@ -18,7 +19,6 @@ The collection currently consists of the following libraries:
 * **Open Power Security** - security framework and a growing collection of various access control and security mechanisms.
 * **Open Power Template** - advanced, XML-based template engine.
 * **Open Power Translate** - alternative internationalization component compatible with the Symfony 2 Translate interfaces.
-* **Open Power Visitor** - collects information about the user and the HTTP request.
 
 History
 =======

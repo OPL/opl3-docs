@@ -1,0 +1,7 @@
+Title: Open Power Collector
+
+---
+
+In a typical web application there are many components that want to share some data to the other parts of the system. The most obvious case is the system configuration - a set of values loaded from a file or database which determines the way the application works. **Open Power Collector** provides a generic data collector that can be used for various purposes. It supports nested value sets, caching and loading the data from different sources. By default, the library provides some general-purpose data loaders that allow you to build a configuration system and a user request data collector. However, it is very easy to extend the library with custom loaders, adapting it to new situations.
+
+Open Power Collector is also the default configuration system for other projects from the OPL foundation. You will certainly meet it every time you configure any OPL project.

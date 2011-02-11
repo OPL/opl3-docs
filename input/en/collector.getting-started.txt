@@ -1,0 +1,84 @@
+Title: Getting started
+
+----
+
+Open Power Collector can be adapted to many different situations. First, we must choose the places, where we would use it. The most obvious case is a configuration system. The example below shows, how to configure the collector to work in this way:
+
+~~~~
+[php]
+<?php
+use Opl\Collector\Collector;
+use Opl\Collector\Configuration\IniFileLoader;
+
+$loader = new IniFileLoader('./config/');
+$loader->setFile('config.ini');
+
+$collector = new Collector();
+$collector->loadFromLoader(Collector::ROOT, $loader);
+
+// the system:
+
+if($collector->get('system.module.option'))
+{
+	doSomething();
+}
+else
+{
+	doSomethingElse();
+}
+~~~~
+
+As we can see, the data collector is a single object of `Collector` class. It contains a couple of methods for importing the data from arrays and objects called *data loaders*. Once it is populated, we can use the `get()` method to retireve the data. In this case, we used one of the predefined loaders, `IniFileLoader` which loads the data from an INI file. It is shown in the following listing:
+
+~~~~
+[ini]
+system.module.option = true
+system.module.anotherOption = false
+system.module.someLimit = 30
+~~~~
+
+The loaded options are organized into a hierarchical tree of nodes. Dots are used as node name separators. Let's consider a situation, where we must extract the entire `system.module` group in order to pass it to the interested module:
+
+~~~~
+[php]
+use Opl\Collector\ProviderInterface;
+
+class OurModule
+{
+	public function doOperation(ProviderInterface $moduleConfig)
+	{
+		if($moduleConfig->get('option'))
+		{
+			doSomething();
+		}
+	} // end doOperation();
+} // end OurModule;
+
+$module = new OurModule;
+$module->doOperation($collector->get('system.module'));
+~~~~
+
+The collector object can also produce so-called *providers*. They simply distribute the data. In our example, the module requires the `system.module.option` to be defined. However, it only knows the last part of the name: `option`, and the rest of the path is application-dependent. The solution is to get a provider for the entire `system.module` node and pass it to our module. If the module options are moved to some other location, we just change the key in the module operation call.
+
+Internally, collectors are also data providers, but extended with extra methods to load the data from different sources. This means that the collector itself can be also passed to the module.
+
+Visit data
+==========
+
+Another possible usage is collecting the user visit information. Open Power Collector provides a couple of loaders for this task, as well:
+
+~~~~
+[php]
+<?php
+use Opl\Collector\Collector;
+use Opl\Collector\Visit\HostLoader;
+use Opl\Collector\Visit\ConnectionLoader;
+
+$visit = new Collector();
+$visit->loadFromLoader(Collector::ROOT, new HostLoader());
+$visit->loadFromLoader(Collector::ROOT, new ConnectionLoader());
+
+echo 'The user comes to us from '.$visit->get('ip').'.<br/>';
+echo 'He uses IPv'.$visit->get('ipVersion').' protocol<br/>';
+echo 'The connection is '.($visit->get('secure') ? '' : 'not').' secured with SSL.';
+~~~~
