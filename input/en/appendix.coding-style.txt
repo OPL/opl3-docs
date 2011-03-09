@@ -3,4 +3,146 @@ Appendix: Yes
 
 ---
 
-To be written.
+This appendix describes the coding style used in the OPL project.
+
+General guidelines
+==================
+
+* We do not end the files with the trailing `?>`
+* We use **tabs**, not **spaces** to make indentations. Every new indentation level is one tab-long.
+* Every file must begin with a header specifying the project name, licensing information and copyrights.
+
+Code organization
+=================
+
+* We use the PSR-0 class naming convention.
+* We use PHP 5.3 namespaces.
+* Every PHP file that contains a class, an interface or a trait must belong to a namespace.
+* Every PHP file may contain at most one class, interface or trait.
+* We avoid using traditional PHP functions.
+* It is disallowed to create static class fields. Static methods are allowed, but their side effects should be local.
+* We assume that the classes are loaded with a PSR0-compatible autoloader.
+* The namespaces have a direct 1:1 mapping to the file structure.
+* The file names use the `.php` extension.
+* The class and file names are both case-sensitive.
+
+Basic code formatting
+=====================
+
+* We increase the indentation level with the new code block, long array content, multiline function/method arguments. The indentation level is decreased once the block/long array/arguments are finished.
+
+* The curly brackets are always opened in a new line:
+
+      [php]
+      if($foo)
+      {
+          bar();
+      }
+
+* We do not use the short forms of control structures. The following code is **invalid**:
+
+      [php]
+      if($foo)
+          bar();
+
+* We do not use the alternative control structure syntax. The following code is **invalid**:
+
+      [php]
+      if($foo)
+          bar();
+      endif;
+
+* For *do .. while* the trailing *while* is always written in a new line:
+
+      [php]
+      do
+      {
+          bar();
+      }
+      while($foo);
+
+* **elseif**, **else** and **catch** are always written in a new line:
+
+      [php]
+      try
+      {
+          if($foo)
+          {
+          
+          }
+          elseif($bar)
+          {
+          
+          }
+          else
+          {
+          
+          }
+      }
+      catch(Exception $exception)
+      {
+      
+      }
+
+* It is allowed to split the longer interface import in the class declaration into many lines. In this case every line specifies a single interface and is indented with a single tab:
+
+      [php]
+      class Foo implements
+          Interface1,
+          Interface2,
+          Interface3
+      {
+      
+      } // end Foo;
+
+* We do not use the curly bracket form of the namespace declaration. The following code shows the only valid namespace declaration:
+
+      [php]
+      namespace Opl\Foo;
+      
+      class Bar
+      {
+      
+      } // end Bar;
+
+* We do not prepend the imported class names with a slash in the `use` block:
+
+      [php]
+      namespace Opl\Foo;
+      use Opl\Bar\Joe;
+      use Symfony\Component\Something;
+      use PDO;
+
+* The ending curly bracket that closes the method body, must contain an additional comment with the words "end methodName();"
+
+      [php]
+      public function foo()
+      {
+          doSomething();
+      } // end foo();
+
+* The ending curly bracket that closes the class, interface or trait body, must contain an additional comment with the words "end unitName;"
+
+      [php]
+      class Foo
+      {
+      
+      } // end Foo;
+
+Naming standards
+================
+
+* The variable names must follow the camelCase convention: `$myVariable`
+* The class field names must follow the camelCase convention: `$this->myField`
+* The method and function names must follow the camelCase convention: `$this->myMethod()`
+* The class field and method names may be prepended with an underscore, if their intended usage does not match to the possible usage suggested by a visibility modifier. For example, if we have a method that must be accessible to some parts of the internal code, but located in another class, we must use the **public** modifier, but by prepending the function name with `_` we suggest that the programmer should not call it externally.
+* The underscore can be also prepended, if the interface contains a general method, but does not want to open all the features to the public. In this case, the more general method can be underscored, and we provide a simpler public method with the same name that calls the first method.
+* The class, interface, namespace and trait names must not use underscores.
+* The class, interface, namespace and trait names must have the first letter capitalized.
+* If the class, interface, namespace or trait name consists of more than one words, the first letter of each word is also capitalized: `FooInterface`.
+* The exception classes must end with the `Exception` word, for example: `FooException`.
+* The interface names must end with the `Interface` word: `FooInterface`, or use the verb adjective form: `Countable`
+* The method, variable and field names should be self-descriptive.
+
+
+      
