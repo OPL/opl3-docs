@@ -1,4 +1,6 @@
 Title: Visit
+ENamespace: Opl\Collector\Configuration
+Stability: alpha
 
 ----
 

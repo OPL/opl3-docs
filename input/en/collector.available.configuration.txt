@@ -1,4 +1,6 @@
 Title: Configuration
+ENamespace: Opl\Collector\Configuration
+Stability: beta
 
 ----
 
