@@ -2,4 +2,139 @@ Title: Theory of operation
 
 ----
 
-Theory of operation.
+Open Power Collector offers simple yet effective way for retrieving the data from various sources. There are three primary concepts upon which the library is built:
+
+* **Loaders** - small classes that know, where the data are stored and how to load them into the system.
+* **Providers** - classes that know how to share the data with the script.
+* **Collectors** - extended providers with the ability to load the data with the loaders.
+
+Loaders
+=======
+
+A valid loader must extend the `Opl\Collector\LoaderInterface` class. It provides a single `import()` method. Its task is to produce a nested array of keys and their values. Below, you can see a sample implementation that returns some static data:
+
+~~~~
+[php]
+class StaticLoader implements LoaderInterface
+{
+	public function import()
+	{
+		return array(
+			'user' => array(
+				'id' => 5,
+				'login' => 'John Doe',
+				'email' => 'john@example.com'
+			),
+			'session' => array(
+				'id' => 'foo',
+				'lastActivity' => 123456789
+			)
+		);
+	} // end import();
+} // end StaticLoader;
+~~~~
+
+There are no limits on the nesting level other than the PHP and system resource limits.
+
+Loaders can load the data from everywhere. As you can see in the next chapters, they are used to build a configuration system thanks to a couple of loaders that load the XML, YAML or INI files. On the other hand, the `Visit` namespace collects various information about the HTTP request, and in the example above, we showed that they can also return session data. The whole library can be seen as a big data storage that offers them in the unified structure through a unified interface, no matter what those data are.
+
+Collectors
+==========
+
+The `Collector` class provides the interface to collect and access the data. It organizes them into a hierarchical tree of keys and their values. Each value is identified by a path of node names separated with a dot, such as `foo.bar.joe`. We can access both the scalar values, and the whole groups of nodes. For example, let's say that `application.database.host` keeps the database host setting. In simple applications, we can simply access each of the database connection properties explicitely, but what if the database connection is constructed by some factory? The collector allows you to pass the entire `application.database` group into the factory:
+
+~~~~
+[php]
+use Opl\Collector\ProviderInterface;
+use Opl\Collector\Collector;
+
+$collector = new Collector();
+
+function dbFactory(ProviderInterface $provider)
+{
+	return new PDO(
+		$provider->get('dbtype').':'.
+		'host='.$provider->get('host').';'.
+		'dbname='.$provider->get('dbname'),
+		$provider->get('dbuser'),
+		$provider->get('dbpass')
+	);
+} // end dbFactory();
+
+$pdo = dbFactory($collector->get('application.database'));
+~~~~
+
+The data can be inserted into a collection from loaders or from arrays. In each case, we can specify the node, where the new keys should be mounted:
+
+~~~~
+[php]
+$collector->loadFromArray(Collector::ROOT, array(
+	'foo' => 'value 1',
+	'bar' => 'value 2',
+	'joe' => array(
+		'goo' => 'value 3',
+		'hoo' => 'value 4'	
+	)
+));
+
+// prints "value 1"
+echo $collector->get('foo');
+~~~~
+
+In the example above, we mounted the new keys as root nodes, but there are also other possibilities:
+
+~~~~
+[php]
+$collector->loadFromArray('application.database', array(
+	'dbtype' => 'mysql',
+	'dbname' => 'foo',
+	'host' => 'localhost',
+	'dbuser' => 'root',
+	'dbpass' => 'root'
+));
+
+// prints "mysql"
+echo $collector->get('application.database.dbtype');
+~~~~
+
+Providers
+=========
+
+`` specifies the interface to access the data. The class `Provider` is the default data provider that organizes the values into a hierarchical tree. The plain provider class does not, however, contain anything to insert the data into the object, so we cannot construct it explicitely. In fact, `Provider` objects are returned by collectors, where we attempt to get a whole group of keys. Let's get back to our database example:
+
+~~~~
+[php]
+use Opl\Collector\ProviderInterface;
+use Opl\Collector\Collector;
+
+$collector = new Collector();
+
+function dbFactory(ProviderInterface $provider)
+{
+	return new PDO(
+		$provider->get('dbtype').':'.
+		'host='.$provider->get('host').';'.
+		'dbname='.$provider->get('dbname'),
+		$provider->get('dbuser'),
+		$provider->get('dbpass')
+	);
+} // end dbFactory();
+
+$pdo = dbFactory($collector->get('application.database'));
+~~~~
+
+Here, the `$collector->get()` call constructs a provider object and internally initializes it to point to the `application.database` node. In this way, the factory can still use the same interface to retrieve the data and does not have to know the fully qualified path to the connection configuration. Because we do not need to modify the tree anymore, the providers simply offer a way to access the data and nothing more. The new nodes can be added only with a collector.
+
+For simple unit testing, mocking or more specific needs, the `Opl\Collector\ProviderInterface` interface specifies, how to access the data:
+
+~~~~
+interface ProviderInterface
+{
+	const THROW_EXCEPTION = 0;
+	const THROW_NULL = 1;
+
+	public function get($key, $errorReporting = self::THROW_EXCEPTION);
+} // end ProviderInterface;
+~~~~
+
+As the first argument of the `get()` method, we specify the key we want to get, and as the second argument - the error reporting mode. The providers should throw exceptions, if the key do not exists and `$errorReporting` is set to `THROW_EXCEPTION`. `THROW_NULL` indicates that the `get()` method should return **null** in this case.

@@ -2,4 +2,23 @@ Title: Visit
 
 ----
 
-Visit
+The visit loaders collect various data about the user visit.
+
+HostLoader
+----------
+
+Returns the data about the remote host. The registered keys:
+
+* `ip` - the remote IP address
+* `binaryIp` - the binary form of the remote IP address (4 or 16 bytes, depending on the IP version)
+* `ipVersion` - either 4 or 6.
+
+ConnectionLoader
+----------------
+
+Returns the data about the connection. The registered keys:
+
+* `port` - the connection port
+* `isSecure` - **true**, if this is a secure SSL connection
+* `method` - the HTTP request method name
+* `protocol` - the protocol name. Currently the loader recognizes the following protocols: `https`, `http` and `wap`.

@@ -2,4 +2,59 @@ Title: Writing custom loaders
 
 ----
 
-Writing custom loaders.
+In order to write a custom loader, you must implement the `Opl\Collector\LoaderInterface`:
+
+~~~~
+[php]
+interface LoaderInterface
+{
+	public function import();
+} // end LoaderInterface;
+~~~~
+
+The only method is `import()` which must collect the data and return them in a form of an associative array. The array can be nested to get a hierarchical structure:
+
+~~~~
+[php]
+class StaticLoader implements LoaderInterface
+{
+	public function import()
+	{
+		return array(
+			'user' => array(
+				'id' => 5,
+				'login' => 'John Doe',
+				'email' => 'john@example.com'
+			),
+			'session' => array(
+				'id' => 'foo',
+				'lastActivity' => 123456789
+			)
+		);
+	} // end import();
+} // end StaticLoader;
+~~~~
+
+For loading the data from a file, we can utilize the `Opl\Collector\Configuration\FileLoader` abstract class which provides the features related to locating the files on the disk and managing the paths. Below you can find, how to begin your `import()` method in this case:
+
+~~~~
+[php]
+class MyFileLoader extends FileLoader
+{
+	public function import()
+	{
+		if(null === $this->currentFile)
+		{
+			throw new BadMethodCallException('Cannot load a file: no file specified');
+		}
+		
+		$data = load_the_file($this->findFile($this->currentFile));
+		
+		// process the data here
+		
+		return $dataArray;
+	} // end import();
+} // end MyFileLoader;
+~~~~
+
+The `findFile()` method scans all the defined paths, looking for the first occurence of the specified file. If it finds one, it returns the complete path to the file that should be loaded. If no file is found, it throws an exception. Note that it is a good practice to check if the programmer actually set any file name, just like we have done this in the first three lines.

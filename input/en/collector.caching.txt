@@ -2,4 +2,28 @@ Title: Caching
 
 ----
 
-Caching.
+In some usage scenarios such as the configuration system, loading the data from the files every request is very inefficient. In this case we would like to cache the configuration data tree in a shared memory. Open Power Collector can be integrated with Open Power Cache in order to provide a caching service. The example below shows, how to use the `Collector` objects with APC:
+
+~~~~
+[php]
+use Opl\Cache\APC;
+use Opl\Collector\Collector;
+use Opl\Collector\Configuration\IniFileLoader;
+
+$apc = new APC(array(
+	'prefix' => 'myapp:',
+	'lifetime' => 86400
+));
+
+$collector = new Collector($apc, 'configuration');
+if(!$collector->isCached())
+{
+	$loader = new IniFileLoader('./config/');
+	$collector->loadFromLoader(Collector:ROOT, $loader->setFile('config.ini'));
+	$collector->save();
+}
+
+echo $collector->get('some.key');
+~~~~
+
+The second argument of the class constructor specifies the cache key, where the data should be stored. To check if the data are successfully loaded from a cache, we use `isCached()` method and to populate the cache again - `save()`. Note that this gives you a control over what data are cached and what are not. You can safely load part of the data from the cache, and generate the rest dynamically.

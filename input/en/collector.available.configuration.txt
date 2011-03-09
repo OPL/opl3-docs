@@ -2,4 +2,99 @@ Title: Configuration
 
 ----
 
-Configuration.
+The configuration loaders allow to load the data from the various types of files. The currently supported formats are:
+
+* INI files
+* XML files (through the SimpleXML extension)
+* YAML files (through the Symfony 2 YAML Component)
+
+The loaders extend a common `Opl\Collector\Configuration\FileLoader` class which provides a unified interface for specifying paths and files to load. The list of sequentially scanned paths is provided in the constructor as an array:
+
+~~~~
+[php]
+$loader = new IniFileLoader(array(
+	'./directory1/',
+	'./directory2/',
+	'./directory3/',
+));
+~~~~
+
+If we have a single path, we can omit the array and pass the string as an argument. 
+
+The file to load is specified with the `setFile()` method, and to get the name of the current file, we can use `getFile()` respecitvely:
+
+~~~~
+[php]
+$loader->setFile('file.ini');
+~~~~
+
+The method implements fluent interface:
+
+~~~~
+[php]
+$collector->loadFromLoader(Collector::ROOT, $loader->setFile('file.xml'));
+~~~~
+
+> [information]
+> Loading the data from configuration files takes a while. In order to optimize the configuration loading, you can combine your collector with Open Power Cache.
+
+IniFileLoader
+=============
+
+This loader loads the data from INI files. Each line defines a single option, and the key is the fully qualified path:
+
+~~~~
+[ini]
+application.name = "My Application"
+application.database.dbtype = "mysql"
+application.database.dbname = "foo"
+application.database.host = "localhost"
+application.database.dbuser = "root"
+application.database.dbpass = "root"
+~~~~
+
+XmlFileLoader
+=============
+
+This loader loads the data from XML files. The XSD Schema is provided with the installation package in the `xml/collector.xsd` file. Below, you can find a sample XML structure:
+
+~~~~
+[xml]
+<?xml version="1.0" encoding="UTF-8"?>
+<group
+	xmlns="http://xml.invenzzia.org/opl/collection"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="./xml/collection.xsd">
+	<group name="application">
+		<item name="name">My application</item>
+		<group name="database">
+			<item name="dbtype">mysql</item>
+			<item name="dbname">foo</item>
+			<item name="host">localhost</item>
+			<item name="dbuser">root</item>
+			<item name="dbpass">root</item>
+		</group>
+	</group>
+</group>
+~~~~
+
+The first `<group>` tag represents the root node and does not have a name. For the rest of the tags, providing the `name` attribute is obligatory. Each `<group>` tag may contain any number of both `<group>` and `<item>` tags in any order.
+
+For the XML document validation, we can use the `xmlint` application.
+
+YamlFileLoader
+==============
+
+This loader loads the data from YAML files. It simply returns the array produced by Symfony 2 YAML Component parser:
+
+~~~~
+[yml]
+application:
+  name: 'My application'
+  database:
+    dbtype: 'mysql'
+    dbname: 'foo'
+    host: 'localhost'
+    dbuser: 'root'
+    dbpass: 'root'
+~~~~
