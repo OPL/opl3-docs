@@ -10,15 +10,11 @@ Open Power Libs is a collection of specialized utility libraries for PHP 5.3+. W
 The collection currently consists of the following libraries:
 
 * **Open Power Autoloader** - collection of fast, universal class autoloaders.
-* **Open Power Cache** - unified interface for various caching systems.
+* **Open Power Cache** - caching library implementing different, efficient caching strategies.
 * **Open Power Collector** - generic data collector. Possible usage includes system configuration and HTTP request data collection.
-* **Open Power Error Handler** - advanced error message renderer, with context handling.
-* **Open Power Forms** - form processor integrated with Open Power Template.
-* **Open Power Navigation** - website navigation manager.
+* **Open Power Dependency** - dependency injection container.
 * **Open Power Pagination** - pagination component.
-* **Open Power Security** - security framework and a growing collection of various access control and security mechanisms.
-* **Open Power Template** - advanced, XML-based template engine.
-* **Open Power Translate** - alternative internationalization component compatible with the Symfony 2 Translate interfaces.
+* **Open Power Template** - universal template engine.
 
 History
 =======
@@ -38,17 +34,16 @@ PHP requirements:
 * Intl enabled,
 * PCRE enabled,
 * PHAR enabled,
-* SPL enabled.
+* SPL enabled,
+* [APC](http://pecl.php.net/package/apc) **or** [Memcached](http://pecl.php.net/package/memcached) **or** [chdb](http://pecl.php.net/package/chdb) (or any combintation of them) in order to have the caching support.
 
-All the following components are available by default in every PHP 5.3 installation; unless you disabled it, you should already have them. For some of the libraries, it is strongly recommended to use a shared-memory caching system, i.e. [APC](http://docs.php.net/apc) or [Memcached](http://memcached.org/).
+Except the caching PECL extensions, the remaining ones are available by default in a typical PHP installation. Unless you disabled them explicitely, they are here.
 
 Library requirements:
 
 * Any class autoloader compatible with [PSR-0](http://groups.google.com/group/php-standards/web/psr-0-final-proposal) class naming standard.
-* [Symfony 2 Console Component](http://symfony-reloaded.org) - for the CLI operations.
-* [Symfony 2 YAML Component](http://symfony-reloaded.org) - for operations on YAML files,
-* [Symfony 2 Event Dispatcher](http://symfony-reloaded.org)
-* [Symfony 2 Translation Component](http://symfony-reloaded.org) - for *Open Power Translate*
+* [Symfony 2 Console Component](http://www.symfony.com) - for the CLI operations.
+* [Symfony 2 YAML Component](http://www.symfony.com) - for operations on YAML files,
 
 How the libraries are designed?
 ===============================
