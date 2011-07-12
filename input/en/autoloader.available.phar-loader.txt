@@ -2,12 +2,13 @@ Title: PHARLoader
 Construct: class
 ENamespace: Opl\Autoloader
 Stability: beta
+VersionSince: 3.0.1.0
 SeeAlsoExternal:
  - http://docs.php.net/phar PHAR documentation in the PHP manual
 
 ----
 
-`PHARLoader` is a special version of the [class map loader][autoloader.available.phar-loader] for self-contained PHAR-s. It has been designed with the following observations:
+`PHARLoader` is a special version of the [class map loader][autoloader.available.class-map-loader] for self-contained PHAR-s. It has been designed with the following observations:
 
 * the paths within the archive are constant and well-known,
 * the contents of the archive usually do not change. If there is a change, we can build a new archive,
@@ -30,9 +31,10 @@ $phar->buildFromDirectory('./source/');
 
 $builder = new ClassMapBuilder();
 $builder->addNamespace('MyNamespace', './source/');
+$builder->buildMap();
 
 $phar->setStub(file_get_contents(__DIR__.'/../src/Opl/Autoloader/PHARLoader.php').'
-$loader = new PHARLoader('.var_export($builder->getMap(), true).');
+$loader = new PHARLoader('.var_export($builder->getMap()).');
 $loader->register();
 __HALT_COMPILER();');
 

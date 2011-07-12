@@ -1,0 +1,37 @@
+Title: ChdbLoader
+Construct: class
+ENamespace: Opl\Autoloader
+Stability: beta
+VersionSince: 3.0.3.0
+SeeAlso:
+ - autoloader.available.class-map-loader
+ - autoloader.toolset.class-map-builder
+ - autoloader.cli
+ 
+----
+
+This autoloader is a modification of `ClassMapLoader` which supports caching the class map in the shared memory provided by [chdb](http://pecl.php.net/package/chdb) extension. The extension is not currently bundled with the standard PHP distribution.
+
+The **chdb** extension provides a constant, read-only hash database stored in a memory-mapped file, a standard shared memory mechanism provided by Unix systems. The file works like a swap memory - the pages are loaded into RAM, when they are needed for the first time. Chdb does not permit random-access modifications of the file contents in order to achieve greater performance and constant-time `O(1)` read complexity, which is not necessarily true for APC.
+
+Basic usage
+===========
+
+~~~~
+[php]
+require('../src/Opl/Autoloader/ChdbLoader.php');
+
+$loader = new \Opl\Autoloader\ChdbLoader('../src/', '../output/classMap.chdb');
+$loader->addNamespace('Opl');
+$loader->addNamespace('Symfony');
+$loader->register();
+~~~~
+
+The class map for the `ChdbLoader` must be generated with [opl:autoloader:build-class-map][autoloader.cli] CLI command with the `--type=chdb` option. If the class hierarchy is changed, we simply call this command again, and the new map will be available for the processes immediately. The command line tool uses a nice trick that allows to avoid race conditions during saving the modified map into the file.
+
+Limitations
+===========
+
+The chdb does not permit random-access modifications of the class map file. If the class hierarchy is changed, the entire memory-mapped file must be regenerated. For the class map, this is not actually a problem, because the class hierarchy does not change very often on production servers.
+
+Chdb extension does not work on Windows.

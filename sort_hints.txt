@@ -2,8 +2,13 @@ introduction
 installation
 conventions
 autoloader
+autoloader.operations
 autoloader.available
-autoloader.class-maps
+autoloader.toolset
+autoloader.toolset.configuration
+autoloader.toolset.class-map-builder
+autoloader.toolset.core-dump
+autoloader.core-tracker
 autoloader.cli
 autoloader.performance
 collector

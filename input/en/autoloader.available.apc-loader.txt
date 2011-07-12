@@ -1,0 +1,35 @@
+Title: ApcLoader
+Construct: class
+ENamespace: Opl\Autoloader
+Stability: beta
+VersionSince: 3.0.3.0
+SeeAlso:
+ - autoloader.available.class-map-loader
+ - autoloader.toolset.class-map-builder
+ - autoloader.cli
+ 
+----
+
+This autoloader is a modification of `ClassMapLoader` which supports caching the class map in the shared memory provided by [Advanced PHP Cache](http://pecl.php.net/package/APC) extension. The extension is not currently bundled with the standard PHP distribution, but it is available on many hostings.
+
+When the autoloader is run for the first time, it reads the class map from the same file, as `ClassMapLoader`, but also stores it in the shared memory. Since then, it uses the map in the shared memory, reducing the number of disk operations.
+
+Basic usage
+===========
+
+~~~~
+[php]
+require('../src/Opl/Autoloader/ApcLoader.php');
+
+$loader = new \Opl\Autoloader\ApcLoader('../src/', '../output/classMap.txt', 'apcKey');
+$loader->addNamespace('Opl');
+$loader->addNamespace('Symfony');
+$loader->register();
+~~~~
+
+The only difference between `ApcLoader` and `ClassMapLoader` is the third constructor argument which defines the APC key, where the map should be stored. The autoloader does not set any expiration time.
+
+Limitations
+===========
+
+APC does not provide an inter-process shared memory. In the FastCGI installation, each FastCGI process uses its own shared memory. In addition, the command line interface cannot see the FastCGI/PHP module shared memory, too. If the class map is changed, we must either wait until the processes are respawned or restart PHP.

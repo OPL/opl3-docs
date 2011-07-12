@@ -1,0 +1,60 @@
+Title: Core tracker
+ENamespace: Opl\Autoloader
+Stability: beta
+VersionSince: 3.0.2.0
+
+----
+
+`Opl\Autoloader\CoreTracker` is an autoloader decorator used for finding the application core. By **core** we understand a group of classes and interfaces that are necessary to start the application, and have to be loaded in every request. If we know they are needed, using traditional autoloading techniques does not bring us any benefits, but just costs us the execution time, where their names are translated into the file paths. Once we have found the core, we can skip the autoloading process for them and load them explicitely. A number of extra tools available in Open Power Autoloader helps us in this task.
+
+Theory of operation
+===================
+
+`CoreTracker` decorates the actual autoloader which is responsible for loading a class. Next, it remembers the class name. The constructed core is persisted between HTTP requests in a text file. If the text file is empty, the tracker simply writes the noted class names into it to create the initial list of classes. In the subsequent requests, it calculates the difference between the request-specific class list and the list from the file. Only the classes that appear in both of them, are saved in the file. By definition, the class that appears in the file and does not appear in the request (or vice versa) cannot be a part of the core.
+
+Each request improves the core approximation. The programmer should walk through the application, generating as many different HTTP requests, as possible, to find the best core approximation. It is he who decides when to stop collecting the data and use the constructed list as the core.
+
+How to use?
+===========
+
+The core tracker is instantiated in the entry script, together with the autoloaders. Currently, it can decorate only a single autoloader instance:
+
+~~~~
+[php]
+require(LIB_DIR.'Opl/Autoloader/GenericLoader.php');
+require(LIB_DIR.'Opl/Autoloader/CoreTracker.php');
+$loader = new Opl\Autoloader\GenericLoader(LIB_DIR);
+$loader->addNamespace('Opl');
+$loader->addNamespace('Symfony');
+$loader->addNamespace('Doctrine');
+ 
+$tracker = new Opl\Autoloader\CoreTracker($loader, '../cache/core.txt');
+$tracker->register();
+
+// run the application here
+~~~~
+
+Instead of registering the autoloader, we pass it to the `CoreTracker` class constructor. It also accepts the path to the core file. The location must be writeable by PHP. Then, we register the tracker in the PHP autoloader stack. Except registering, and unregistering, `CoreTracker` class does not have any other public operations.
+
+How to process the core?
+========================
+
+Once we have a core, we would like to do something with the collected data. The toolset contains one class responsible for processing the core: `Opl\Autoloader\Toolset\CoreDump`. Its functionality is packed into a CLI command `Opl\Autoloader\Command\CoreDump`:
+
+~~~~
+[php]
+./cli opl:autoloader:core-dump-export ../config.xml --export-type=require
+~~~~
+
+This command exports the core to the form of a list of `require` statements that load the core classes explicitely. The statements are saved into the file `core-export` defined in the configuration file. The core must be saved in the location pointed by the file `core-dump` defined in the configuration file or specified with the `--core` option.
+
+Currently, Open Power Autoloader supports the following export types:
+
+`--export-type=require`
+:	Creates the list of `require` statements that load the core classes.
+
+`--export-type=concat`
+:	Concatenates the core files into a single PHP file saved in the specified location. The concatenation is safe for both namespaced and non-namespaced code which can be freely mixed in a single file.
+
+`--export-type=concat --strip-comments`
+:	This option is similar to `--export-type=concat`. It also strips the file header comments, reducing the output file size.

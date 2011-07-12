@@ -1,0 +1,5 @@
+Title: Toolset
+
+----
+
+The toolset contains the implementations of various utility tools that can be used to diagnose or manage the autoloaders within our application. Note that this section describes the class interfaces and the theory of operation, whereas all of them are also available as Command-Line Interface commands.

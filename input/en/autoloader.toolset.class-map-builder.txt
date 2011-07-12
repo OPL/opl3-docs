@@ -1,0 +1,47 @@
+Title: ClassMapBuilder
+ENamespace: Opl\Autoloader\Toolset
+EExtends: Opl\Autoloader\Toolset\AbstractTool
+Stability: beta
+VersionSince: 3.0.1.0
+
+----
+
+The class map builder is used to generate project class maps. A class map contains the names of all the classes, interfaces and traits (as of PHP 5.4) found within the specified directories and paths to the files declaring them.
+
+Using ClassMapBuilder
+=====================
+
+The `Opl\Autoloader\Toolset\ClassMapBuilder` has a relatively simple interface:
+
+~~~~
+[php]
+$builder = new Opl\Autoloader\Toolset\ClassMapBuilder();
+$builder->addNamespace('Opl', './src/');
+$builder->addNamespace('Zend', './src/');
+$builder->addNamespace('Symfony', './src/');
+
+$builder->buildMap();
+echo serialize($builder->getMap());
+~~~~
+
+The namespace management methods are declared in the base class `Opl\Autoloader\Toolset\AbstractTool`. The class map builder does not contain any methods allowing the export to the given format. The programmer must use the `getMap()` method and save the returned result explicitely.
+
+> [information]
+> You can also use the [opl:autoloader:build-class-map][autoloader.cli] CLI command to build class maps. The CLI command supports the OPA configuration files.
+
+Class map format
+================
+
+The map format is very simple. It is an associative array, where the index represents the fully qualified class name. The value is a pair of two values:
+
+* **0** - the top-level namespace name.
+* **1** - the relative path to the file with the class.
+
+The path is specified relatively to the root directory specified in the `addNamespace()` method. Suppose that we have `Foo\Bar` class in `../src/Foo/Bar.php`. The entry in the map will contain just the `Foo/Bar.php` part of the path. This allows to move the class hierarchy without the need to generate a new map, or define relative positions from different places. To identify the class hierarchy location, the autoloader must know the top-level namespace name.
+
+The class map builder supports subnamespaces and PHP 5.4 traits.
+
+Parsing rules
+=============
+
+The class map builder extracts the class name by tokenizing the encountered PHP file and looking for `namespace`, `class`, `interface`, and `trait` (as of PHP 5.4) components. It assumes that a single file contains only one class, and once it finds one, the searching is terminated. You cannot use this class map builder for projects, where the files can contain more than one class. Note that it also does not check whether the class name is compatible with PSR-0 class naming standard, so it can be also used for other styles.

@@ -1,0 +1,93 @@
+Title: UniversalLoader
+Construct: class
+ENamespace: Opl\Autoloader
+Stability: beta
+VersionSince: 3.0.2.0
+SeeAlso:
+ - autoloader.available.generic-loader
+
+----
+
+`UniversalLoader` is a standard universal class loader designed for the development environment and low-traffic websites. It translates the class name to the filesystem path dynamically, so it is very scalable and flexible. Any change in the class hierarchy is supported without reconfiguration.
+
+The primary difference between `UniversalLoader` and `GenericLoader` is the support for subnamespaces. In `GenericLoader`, you can only register top-level namespaces, whereas in `UniversalLoader` registering subnamespaces is also allowed (at the performance cost).
+
+Basic usage
+===========
+
+In order to use the autoloader, you must load the `Opl\Autoloader\UniversalLoader.php` file manually and create an object of `UniversalLoader` class:
+
+~~~~
+[php]
+require('../src/Opl/Autoloader/UniversalLoader.php');
+
+$loader = new \Opl\Autoloader\UniversalLoader('../src/');
+$loader->addNamespace('Opl');
+$loader->addNamespace('Symfony');
+$loader->addNamespace('Doctrine\DBAL');
+$loader->addNamespace('Doctrine\ORM');
+$loader->register();
+~~~~
+
+The class constructor takes up to two (optional) arguments:
+
+* The default path to the namespace sources.
+* The namespace separator (default is **\\** - PHP 5.3 namespaces).
+
+Once we have an object, we must specify, what namespaces will be handled by it. If the class does not belong to any of the registered namespaces, the autoloader skips it, passing the request to the next loader in the chain. Finally, we register the autoloader in the PHP core by calling `register()`.
+
+Namespace configuration
+=======================
+
+There are three methods for managing the top-level namespaces registered in the autoloader:
+
+* `addNamespace($name)` - registers a new namespace in the autoloader,
+* `hasNamespace($name)` - checks if the specified namespace is registered in the autoloader,
+* `removeNamespace($name)` - removes the namespace from the autoloader.
+
+By default, newly registered namespaces are assumed to be located under the path specified in the class constructor, and the files to have `.php` extension. If these values are different for a particular namespace, we can configure them as optional `addNamespace()` arguments:
+
+~~~~
+[php]
+$loader->addNamespace('Application', '../app/', '.class.php');
+~~~~
+
+Handling legacy code
+====================
+
+The namespace separator setting is applied for all the namespaces registered in the autoloader. However, it is possible to use the autoloader for the legacy code that does not use PHP 5.3 namespaces, by registering two autoloaders. The example below shows, how to load Open Power Template 2.1 together with the new code:
+
+~~~~
+[php]
+$nsLoader = new \Opl\Autoloader\UniversalLoader('../src/', '\\');
+// OPL 3.0
+$nsLoader->addNamespace('Opl\');
+// Symfony 2
+$nsLoader->addNamespace('Symfony');
+$nsLoader->register();
+
+$legacyLoader = new \Opl\Autoloader\UniversalLoader('../src/', '_');
+$legacyLoader->addNamespace('Opl_');
+$legacyLoader->register();
+~~~~
+
+The second autoloader uses underscores as namespace separators which allows us to load the legacy code that follows the `Foo_Bar_Joe` naming convention.
+
+Theory of operation
+===================
+
+This autoloader has worse performance than `GenericLoader`, and furthermore, it depends on the number of the registered namespaces. For each loaded class, it iterates through the list of namespaces and attempts to match the namespace prefix to the class name. If the namespace is matched, the rest of the name is translated according to the PSR-0 rules and the file is loaded.
+
+The most commonly used namespaces should be registered first, because they are matched in the first place.
+
+When to use?
+============
+
+You should use this autoloader in:
+
++ the development environment,
++ low-traffic websites.
+
+You should **not** use this autoloader in:
+
++ big-traffic websites (consider using [ClassMapLoader][autoloader.available.class-map-loader] instead).

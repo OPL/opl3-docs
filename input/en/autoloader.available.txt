@@ -3,4 +3,45 @@ Title: Available autoloaders
 
 ---
 
-Currently, Open Power Autoloader provides three autoloaders.
+Currently, Open Power Autoloader provides six autoloaders. Below, you can find a short characteristics:
+
+Production versus development usage
+===================================
+
+Production server autoloaders:
+
+* `Opl\Autoloader\ApcLoader`
+* `Opl\Autoloader\ChdbLoader`
+* `Opl\Autoloader\ClassMapLoader`
+
+Development environment and low-traffic website autoloaders:
+
+* `Opl\Autoloader\GenericLoader`
+* `Opl\Autoloader\UniversalLoader`
+
+PHAR archive loaders:
+
+* `Opl\Autoloader\PHARLoader`
+
+Subnamespace support
+====================
+
+Subnamespaces can be defined in:
+
+* `Opl\Autoloader\ApcLoader`
+* `Opl\Autoloader\ChdbLoader`
+* `Opl\Autoloader\ClassMapLoader`
+* `Opl\Autoloader\UniversalLoader`
+* `Opl\Autoloader\PHARLoader`
+
+Top-level namespaces only:
+
+* `Opl\Autoloader\GenericLoader`
+
+Caching support
+===============
+
+The autoloaders with shared memory cache support:
+
+* `Opl\Autoloader\ApcLoader` (requires [APC](http://pecl.php.net/package/APC) extension)
+* `Opl\Autoloader\ChdbLoader` (requires [chdb](http://pecl.php.net/package/chdb) extension)

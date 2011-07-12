@@ -2,8 +2,10 @@ Title: ClassMapLoader
 Construct: class
 ENamespace: Opl\Autoloader
 Stability: beta
+VersionSince: 3.0.1.0
 SeeAlso:
- - autoloader.class-maps
+ - autoloader.toolset.class-map-builder
+ - autoloader.cli
 
 ----
 
@@ -12,27 +14,13 @@ SeeAlso:
 Basic usage
 ===========
 
-Before using the autoloade, you must build a [class map][autoloader.class-maps]. You can use the command line interface command for it, but first you have to prepare a configuration in an INI file:
+Before using this autoloader, we must generate a class map using the command-line interface. Please refer to the [CLI][autoloader.cli] and [Configuration][autoloader.toolset.configuration] chapters to read more about generating the class maps and writing the Open Power Autoloader configuration files.
 
-~~~~
-[ini]
-[config]
-; Where the map should be stored
-outputFile = "./config/classMap.txt"
-
-; The recognized file extension
-extension = ".php"
-
-[namespaces]
-Opl = "./src/"
-Symfony = "/src/"
-~~~~
-
-Here, we specify the recognized file extension and the output file path, as well as the paths to the top-level namespaces that should be scanned. Now we can build the map:
+Class map generation:
 
 ~~~~
 [console]
-$ ./cli opl:autoloader:build-class-map path/to/configuration.ini
+$ ./cli opl:autoloader:build-class-map path/to/configuration.xml --type=serialized
 ~~~~
 
 Once the map is ready, we can use `ClassMapLoader` in our application. The configuration is very similar to [GenericLoader][autoloader.available.generic-loader]:
@@ -94,3 +82,5 @@ When to use?
 This autoloader offers a bigger performance than `GenericLoader` at a cost of reduced flexibility. It is dedicated for big-traffic websites, where the performance is a critical issue. We do not recommend using it in the development environment, as it requires map regeneration on every class hierarchy change. For web and console applications stored in PHAR-s, you should choose [PHARLoader][autoloader.available.phar-loader].
 
 Note that this autoloader can be used also for projects that do not support [PSR-0](http://groups.google.com/group/php-standards/web/psr-0-final-proposal), because the classes are extracted directly from the source.
+
+In order to make use of the caching mechanisms, please use [ApcLoader][autoloader.available.apc-loader] or [ChdbLoader][autoloader.available.chdb-loader].

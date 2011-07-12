@@ -1,0 +1,128 @@
+Title: Theory of operation
+
+----
+
+In order to use Open Power Autoloader properly, the programmer must agree to a couple of assumptions. The assumptions have been chosen to maximize the performance and the application scalability, and reduce the number of dependencies.
+
+Autoloader's place
+==================
+
+Here, we meet the first and probably the most important assumption. Without it, using Open Power Autoloader has no sense.
+
+> [information]
+>
+> Autoloader is a part of the runtime environment, not the application.
+
+This assumption states that the application should not be aware of the autoloader's existence, and even it should not contain any reference to it. The only application responsiblity is to follow the class naming convention and hoping that there is a configured autoloader which is able to load them.
+
+The autoloader is instantiated and configured before the application, in the entry script (typically, `index.php` file). Once everything works, `index.php` fires the rest of the application:
+
+~~~~
+[php]
+<?php
+require('../src/Opl/Autoloader/GenericLoader.php');
+$loader = new Opl\Autoloader\GenericLoader('../src/');
+$loader->addNamespace('Opl');
+$loader->addNamespace('Framework');
+$loader->addNamespace('Application');
+$loader->register();
+
+$application = new Application\MyApplication();
+$application->run();
+~~~~
+
+Note that we do not pass the autoloader reference to the application.
+
+What can the application do?
+----------------------------
+
+Create the class objects:
+
+~~~~
+[php]
+$object = new Application\MyClass();
+~~~~
+
+Use `spl_autoload_call()` to load the class explicitely:
+
+~~~~
+[php]
+spl_autoload_call('Application\\Controller\\FooController');
+~~~~
+
+Use reflection to discover the path to the class source, if it is really necessary:
+
+~~~~
+[php]
+$selfReflection = new \ReflectionObject($this);
+$namespace = $selfReflection->getNamespaceName();
+$directory = dirname($selfReflection->getFileName());
+
+if(file_exists($directory.'Controller/'.$controllerName.'.php'))
+{
+	$controllerClass = $namespace.'\\Controller\\'.$controllerName;
+	$controller = new $controllerClass();
+}
+~~~~
+
+What practices are forbidden?
+-----------------------------
+
+The application **must not** rely on the autoloader interfaces:
+
+~~~~
+[php]
+public function setAutoloader(Opl\Autoloader\GenericLoader $loader)
+{
+	$this->autoloader = $loader;
+} // end setAutoloader();
+~~~~
+
+The application **must not** use the autoloader objects directly to load classes:
+
+~~~~
+[php]
+$this->loader->loadClass('Foo\\Bar'');
+~~~~
+
+The application **must not** include the PHP files with classes explicitely:
+
+~~~~
+[php]
+require_once('Framework/Router/StandardRouter.php');
+
+class SomeStuff
+{
+
+} // end SomeStuff;
+~~~~
+
+The application **should not** use `include_path`.
+
+Discover your needs
+===================
+
+> [information]
+>
+> There is no autoloader suitable for every possible scenario.
+
+This convention explains why Open Power Autoloader provides six different autoloaders instead of one. An attempt to write an universal class loader that would work everywhere results in heavily overloaded and slow code full of unnecessary options. In OPA, each autoloader is specialized to work in a single, strictly defined scenario and has well-defined costs and benefits. You will use one autoloader in your development environment, and a different one in production systems. Because the application is not aware of the concrete autoloader, you can change them without any problems, and experiment with different configurations to achieve the biggest possible performance or other design goals.
+
+Application deployment
+======================
+
+> [information]
+>
+> Once the application is deployed, the class structure changes rarely. The autoloader does not have to check anything dynamically.
+
+This convention tells us, how OPA works on production servers. The available autoloaders can be divided into two primary groups:
+
+* dynamic class loaders, which translate the class name into the file path on-the-fly. It gives us a great flexibility, because every change in the class structure is visible immediately, but costs us the performance.
+* class map loaders, which use an array containing all the system class names and the paths to them. The map is precomputed during the deployment process, using the command-line additional tools and loaded by the autoloader at the start of the requests.
+
+Is it usable?
+=============
+
+The conventions might seem to be very restrictive at the first sight, but the practice shows they are not. Basically, everything you could need and you could do without them, is still possible. The main change is the clear responsibility separation which makes the code more portable and scalable. All you need to do is to change the way you think about class loading. The benefits are obvious.
+
+These conventions might be hard to apply in the first-generation frameworks, such as Zend Framework 1.x. Although OPA supports Zend naming convention, some classes have hard-coded dependencies on *Zend_Loader*. They must be either removed by the programmer and replaced by some kind of generic code, or we must configure *Zend_Loader*, too. However, OPA can work without any problems with *Symfony 2*, which also adapted similar assumptions and conventions for the class loading process.

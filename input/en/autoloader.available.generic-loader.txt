@@ -2,6 +2,9 @@ Title: GenericLoader
 Construct: class
 ENamespace: Opl\Autoloader
 Stability: beta
+VersionSince: 3.0.1.0
+SeeAlso:
+ - autoloader.available.universal-loader
 
 ----
 
@@ -51,7 +54,7 @@ $loader->addNamespace('Application', '../app/', '.class.php');
 >     [php]
 >     $loader->addNamespace('Application\\Subnamespace', '../extra/');
 >
-> Note that the sub-namespaces are correctly handled as parts of the top-level namespaces. You just can't register them, and set a different location for them.
+> Note that the sub-namespaces are correctly handled as parts of the top-level namespaces. You just can't register them, and set a different location for them. In order to get the full sub-namespace support, please use [UniversalLoader][autoloader.available.universal-loader].
 
 Handling legacy code
 ====================
@@ -101,4 +104,4 @@ You should use this autoloader in:
 You should **not** use this autoloader in:
 
 + big-traffic websites (consider using [ClassMapLoader][autoloader.available.class-map-loader] instead),
-+ the applications, when you have to configure lots of specific paths to the sub-namespaces (consider using `SplClassLoader` or Symfony 2 Universal Class Loader instead).
++ the applications, when you have to configure lots of specific paths to the sub-namespaces (consider using [UniversalLoader](autoloader.available.universal-loader) instead).
